@@ -16,6 +16,7 @@ library(viridis)
 library(sjPlot)
 library(factoextra)
 library(scales)
+library(ggpubr)
 
 #load data
 df <- read.csv("thg_mehg_metanalysis.csv", header=TRUE, fileEncoding="latin1")
@@ -44,7 +45,6 @@ species_summary <-as.data.frame(species_summary)
 species_summary <-subset(species_summary, sum_thg>19)
 write.csv(species_summary, "species_summary.csv")
 
-lm1 <- lm(data= df, )
 #############################################################################3
 #### STEP 1: Get the Ratios and SDs ####
 
@@ -133,15 +133,11 @@ tissue_species
 cowplot::ggsave2("split_tissue_species.jpg", tissue_species, limitsize = FALSE,
                    width =20, height = 20, dpi = 300)
 
-unique_species_tissue <- estimates[!duplicated(estimates$species_tissue),]
-group_means_results<- left_join(group_means_results,  unique_species_tissue[,c("grouping","tissue","species_tissue")], 
-                              by=c("order" ="species_tissue"),keep=FALSE)
-
 tissue_species2 <- ggplot(data = group_means_results, aes(x = proportion, y = order, color = tissue)) + 
   geom_point(size=group_means_results$n_samples/100) + 
   geom_errorbar(aes(xmin = lower_CI , xmax = upper_CI), width = 0.2) +
   theme_bw()+
-  labs(x="MeHg: THg Mean Ratio (95% CI)", y="Species Tissue",color="Tissue", size =12)+
+  labs(x="MeHg: THg Mean Ratio (95% CI)", y="Species/Tissue",color="Tissue", size =12)+
   theme(legend.text=element_text(size=16), text = element_text(size = 20))+
   geom_vline(xintercept=100, linetype="dashed", color = "black")
 tissue_species2
@@ -227,11 +223,32 @@ tissue_species_subgroup <- ggplot(data = group_tissue_meta, aes(x = proportion, 
   geom_errorbar(aes(xmin = lower_CI, xmax = upper_CI), width = 0.2) +
   theme_bw()+
   theme(legend.text=element_text(size=16), text = element_text(size = 16))+
-  labs(x="MeHg: THg Mean Ratio (95% CI)", y="Tissue", color="Tissue", size =12)+
+  labs(x="MeHg: THg Mean Ratio (95% CI)", y="", color="Tissue", size =12)+
+  theme(legend.text=element_text(size=16), text = element_text(size = 20))+
   geom_vline(xintercept=100, linetype="dashed", color = "black")
 tissue_species_subgroup
 #Plot figures with dpi=300
 cowplot::ggsave2("tissue_species_subgroup.jpg", tissue_species_subgroup, 
                  width = 10, height = 10, dpi = 300)
+
+
+
+############################################################
+# Publication Plot #
+
+combined_plot <- ggarrange(tissue_species2, tissue_species_subgroup,
+                               ncol = 2,
+                               labels = "AUTO",
+                               widths = c(1, 0.75),
+                               common.legend = TRUE,
+                               legend = "bottom")
+combined_plot
+
+# Export as TIFF with 300 DPI
+ggsave("combined_plot.tiff", plot = combined_plot, width = 20, height = 15, dpi = 300, units = "in")
+
+
+
+
 
 

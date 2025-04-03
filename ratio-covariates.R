@@ -100,6 +100,15 @@ yp.weight.reg <- metareg(yp_all_rom, ~mean_weight_g+sex)
 yp.weight.reg
 bubble(yp.weight.reg, studlab = FALSE, backtransf = TRUE)
 
+
+multimodel.inference(data=yp_df,
+                     TE = "mehg_ratio", 
+                     seTE = "mehg_ratio_se",
+                     predictors = c("sex", "mean_age", 
+                                    "mean_fork_length_mm", "mean_weight_g"),
+                     interaction = TRUE)
+
+
 #### Fork Length ####
 # fork_length
 mean_fork_length_plot <- ggplot(data= yp_df, aes(y = mehg_ratio, x = mean_fork_length_mm, color = sex))+
