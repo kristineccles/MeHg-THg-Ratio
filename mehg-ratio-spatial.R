@@ -1,8 +1,9 @@
 #####################################################################
 # Assessing spatial patterns of MeHg:THg Ratios
 # By: Kristin Eccles
-# Updated: Dec 9th, 2025
+# Updated: Dec 18th, 2025
 # Written in R Version 4.3.1
+# Note: Can be run independently 
 #####################################################################
 
 # load libraries 
