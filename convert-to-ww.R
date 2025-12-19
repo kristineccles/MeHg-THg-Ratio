@@ -1,8 +1,9 @@
 #####################################################################
 # Converting Database to wet weight (ww)
 # By: Kristin Eccles
-# Updated: August 18th, 2023
+# Updated: Dec 4th, 2025
 # Written in R Version 4.3.1
+# Note: Order to run 01
 #####################################################################
 
 # Load Libraries
@@ -46,9 +47,31 @@ unique(df_converted$group)
 tissue_species_summary <- aggregate(df_converted$moist_cont_perc, by=list(df_converted$group) , FUN= mean, na.rm=TRUE, na.action="na.pass")
 colnames(tissue_species_summary) <-cbind("group", "avg_group_moisture")
 
+group_stats <- df_converted%>%
+  group_by(group)%>%
+  summarise( n = sum(!is.na(moist_cont_perc)),
+             mean = mean(moist_cont_perc, na.rm = TRUE),
+             sd = sd(moist_cont_perc, na.rm = TRUE),
+             se = sd / sqrt(n),
+             CI_lower = ifelse(n > 1, mean - qt(0.975, df=n-1) * se, NA_real_),
+             CI_upper = ifelse(n > 1, mean + qt(0.975, df=n-1) * se, NA_real_)
+  )
+na.omit(group_stats)
+
 #just by tissue
 tissue_summary <- aggregate(df_converted$moist_cont_perc, by=list(df_converted$tissue) , FUN= mean, na.rm=TRUE, na.action="na.pass")
 colnames(tissue_summary) <-cbind("tissue", "avg_tissue_moisture")
+
+tissue_stats <- df_converted%>%
+  group_by(tissue)%>%
+  summarise( n = sum(!is.na(moist_cont_perc)),
+             mean = mean(moist_cont_perc, na.rm = TRUE),
+             sd = sd(moist_cont_perc, na.rm = TRUE),
+             se = sd / sqrt(n),
+             CI_lower = ifelse(n > 1, mean - qt(0.975, df=n-1) * se, NA_real_),
+             CI_upper = ifelse(n > 1, mean + qt(0.975, df=n-1) * se, NA_real_)
+  )
+tissue_stats
 
 # add the average percentage to df
 df_converted <- left_join(df_converted, tissue_species_summary, keep=FALSE)
